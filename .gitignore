@@ -1,0 +1,18 @@
+# Eclipse
+.classpath
+.project
+.settings
+
+# IntelliJ
+.idea
+SweetJavalin.iml
+
+# Maven
+target
+
+# JSweet
+.jsweet
+.ts
+
+# Project specific
+src/main/resources/static/dist
