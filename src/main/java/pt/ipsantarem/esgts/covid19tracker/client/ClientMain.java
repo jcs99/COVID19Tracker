@@ -1,6 +1,6 @@
 package pt.ipsantarem.esgts.covid19tracker.client;
 
-import static def.dom.Globals.alert;
+import static def.dom.Globals.console;
 
 /**
  * Entry point for the client-side component.
@@ -8,8 +8,8 @@ import static def.dom.Globals.alert;
  * plugin.
  * BE CAREFUL WITH USING {@link java} CLASSES HERE!
  */
-public class Main {
+public class ClientMain {
     public static void main(String[] args) {
-        alert("Teste!");
+        console.log(new java.util.Date());
     }
 }
