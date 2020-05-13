@@ -2,7 +2,7 @@ package pt.ipsantarem.esgts.covid19tracker.server;
 
 import pt.ipsantarem.esgts.covid19tracker.server.interfaces.Tree;
 import pt.ipsantarem.esgts.covid19tracker.server.models.NewDeathsNode;
-import pt.ipsantarem.esgts.covid19tracker.server.models.abstracts.AVLVirusTree;
+import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusTree;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -1,7 +1,8 @@
-package pt.ipsantarem.esgts.covid19tracker.server.models.abstracts;
+package pt.ipsantarem.esgts.covid19tracker.server.trees;
 
 import pt.ipsantarem.esgts.covid19tracker.server.interfaces.Tree;
 import pt.ipsantarem.esgts.covid19tracker.server.models.VirusStatistic;
+import pt.ipsantarem.esgts.covid19tracker.server.models.abstracts.VirusStatsNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
