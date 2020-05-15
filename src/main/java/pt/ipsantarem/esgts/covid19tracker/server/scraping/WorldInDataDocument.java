@@ -26,7 +26,7 @@ public class WorldInDataDocument {
         try {
             doc = Jsoup.connect("https://ourworldindata.org/coronavirus-source-data").get();
         } catch (IOException ioe) {
-            LOGGER.error("Could not access the European CDC page, virus stats will not be available until a connection" +
+            LOGGER.error("Could not access the World in Data page, virus stats will not be available until a connection" +
                     "is successfully established!", ioe);
             doc = null;
         }

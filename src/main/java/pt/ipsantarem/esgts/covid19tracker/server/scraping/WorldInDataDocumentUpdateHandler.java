@@ -39,10 +39,10 @@ public class WorldInDataDocumentUpdateHandler implements Callable<String> {
     }
 
     /**
-     * Check for changes on the European CDC page and compare the date of those changes to the last time where we checked
+     * Check for changes on the World in Data page and compare the date of those changes to the last time where we checked
      * for changes locally.
      *
-     * @return A empty list of virus stat records if the European CDC document returned null of if there are no updates
+     * @return A empty list of virus stat records if the World in Data document returned null of if there are no updates
      * to the page since we last checked, or a list of the new records if the page was changed since we last checked it.
      */
     @Override
@@ -50,12 +50,12 @@ public class WorldInDataDocumentUpdateHandler implements Callable<String> {
         // if the document is null, just return a empty csv and try again later. it means that no connection could be
         // established.
         if (worldInDataDocument == null) {
-            LOGGER.warn("World in data document is null, skipping the change check!");
+            LOGGER.warn("World in Data document is null, skipping the change check!");
             return "";
         }
 
         // if there is a connection, we open the locally stored database file that contains the last time we downloaded
-        // the updates on the european cdc page and compare it to the update time in the said page.
+        // the updates on the world in data page and compare it to the update time in the said page.
         try (DB db = DBMaker.fileDB("file.db").fileMmapEnable().make()) {
             Map<String, Date> lastCheckedUpdate = db
                     .hashMap("lastTimeDownloadedUpdates", Serializer.STRING, Serializer.DATE)
