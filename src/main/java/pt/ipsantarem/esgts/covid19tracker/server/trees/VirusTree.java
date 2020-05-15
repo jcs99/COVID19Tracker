@@ -1,13 +1,14 @@
-package pt.ipsantarem.esgts.covid19tracker.server.interfaces;
+package pt.ipsantarem.esgts.covid19tracker.server.trees;
 
 import pt.ipsantarem.esgts.covid19tracker.server.models.VirusStatistic;
+import pt.ipsantarem.esgts.covid19tracker.server.models.nodes.VirusNode;
 
 import java.util.Collection;
 
 /**
  * An interface that describes a virus tree data structure.
  */
-public interface Tree<K extends Comparable<K>, E, T extends Node<K, E>> {
+public interface VirusTree<K extends Comparable<K>, E, T extends VirusNode<K, E>> {
 
     /**
      * @return The root of the tree

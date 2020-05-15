@@ -1,6 +1,4 @@
-package pt.ipsantarem.esgts.covid19tracker.server.models;
-
-import pt.ipsantarem.esgts.covid19tracker.server.models.abstracts.VirusStatsNode;
+package pt.ipsantarem.esgts.covid19tracker.server.models.nodes;
 
 import java.util.Date;
 
@@ -39,7 +37,7 @@ public class TotalCasesNode extends VirusStatsNode<Integer> {
     }
 
     @Override
-    public Integer getVirusStat() {
+    public Integer getNodeInformation() {
         return totalCases;
     }
 }

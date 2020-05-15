@@ -1,6 +1,4 @@
-package pt.ipsantarem.esgts.covid19tracker.server.models.abstracts;
-
-import pt.ipsantarem.esgts.covid19tracker.server.interfaces.Node;
+package pt.ipsantarem.esgts.covid19tracker.server.models.nodes;
 
 import java.util.Date;
 
@@ -11,10 +9,26 @@ import java.util.Date;
  *
  * @param <T> The type of data that the statistic represents.
  */
-public abstract class VirusStatsNode<T> extends Node<Date, T> {
+public abstract class VirusStatsNode<T> extends VirusNode<Date, T> {
+
+    /**
+     * The date of the information present in this node
+     */
     private Date date;
+
+    /**
+     * The country of the information present in this node
+     */
     private String country;
+
+    /**
+     * The left node
+     */
     private VirusStatsNode<T> left;
+
+    /**
+     * The right node
+     */
     private VirusStatsNode<T> right;
 
     public VirusStatsNode(Date date, String country) {
@@ -77,9 +91,10 @@ public abstract class VirusStatsNode<T> extends Node<Date, T> {
         setDate(key);
     }
 
+    /**
+     * @return The type of virus related stat this node will represent
+     */
     public abstract String typeOfVirusStat();
-
-    public abstract T getVirusStat();
 
     @Override
     public int hashCode() {

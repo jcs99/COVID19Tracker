@@ -1,8 +1,7 @@
 package pt.ipsantarem.esgts.covid19tracker.server.trees;
 
-import pt.ipsantarem.esgts.covid19tracker.server.interfaces.Tree;
 import pt.ipsantarem.esgts.covid19tracker.server.models.VirusStatistic;
-import pt.ipsantarem.esgts.covid19tracker.server.models.abstracts.VirusStatsNode;
+import pt.ipsantarem.esgts.covid19tracker.server.models.nodes.VirusStatsNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * A self balancing tree implementation of the interface {@link Tree}
+ * A self balancing tree implementation of the interface {@link VirusTree}
  * All credits go to eric-martin, code adapted from his AVL tree implementation.
  *
  * @param <E> The stat that the virus statistic node represents
@@ -18,7 +17,7 @@ import java.util.List;
  * @see "https://github.com/eugenp/tutorials/blob/master/data-structures/src/main/java/com/baeldung/avltree/AVLTree.java"
  */
 @SuppressWarnings("unchecked")
-public class AVLVirusTree<E, T extends VirusStatsNode<E>> implements Tree<Date, E, T> {
+public class AVLVirusTree<E, T extends VirusStatsNode<E>> implements VirusTree<Date, E, T> {
     private T root;
 
     public AVLVirusTree(T root) {
@@ -183,7 +182,7 @@ public class AVLVirusTree<E, T extends VirusStatsNode<E>> implements Tree<Date, 
 
         List<VirusStatistic<E>> preorder = new ArrayList<>();
 
-        preorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getVirusStat()) {
+        preorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();
@@ -199,7 +198,7 @@ public class AVLVirusTree<E, T extends VirusStatsNode<E>> implements Tree<Date, 
         if (node == null) return Collections.emptyList();
 
         List<VirusStatistic<E>> inorder = new ArrayList<>(inorder((T) node.getLeft()));
-        inorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getVirusStat()) {
+        inorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();
@@ -217,7 +216,7 @@ public class AVLVirusTree<E, T extends VirusStatsNode<E>> implements Tree<Date, 
 
         postorder.addAll(postorder((T) node.getLeft()));
         postorder.addAll(postorder((T) node.getRight()));
-        postorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getVirusStat()) {
+        postorder.add(new VirusStatistic<E>(node.getDate(), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();
