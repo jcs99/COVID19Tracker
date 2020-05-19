@@ -33,6 +33,7 @@ List of endpoints:
 **EXAMPLES**
 
 * New cases since X date.
+
 ![New cases](examples/NewCases.png)
 
 * New cases in X date.
