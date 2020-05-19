@@ -16,3 +16,6 @@ target
 
 # Project specific
 src/main/resources/static/dist
+
+# DB
+*.db

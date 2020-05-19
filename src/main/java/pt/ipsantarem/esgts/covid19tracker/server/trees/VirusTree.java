@@ -18,7 +18,7 @@ public interface VirusTree<K extends Comparable<K>, E, T extends VirusNode<K, E>
     /**
      * @return The obtained element by its key
      */
-    T get(K key);
+    VirusStatistic<E> get(K key);
 
     /**
      * Adds an element to the tree.

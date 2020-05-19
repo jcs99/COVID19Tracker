@@ -1,7 +1,7 @@
 package pt.ipsantarem.esgts.covid19tracker.server;
 
 import pt.ipsantarem.esgts.covid19tracker.server.models.nodes.*;
-import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusTree;
+import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusStatsTree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,17 +9,14 @@ import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.*;
 
-import static pt.ipsantarem.esgts.covid19tracker.server.utils.DateUtils.dateToLocalDate;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.DateUtils.parseStringToDate;
 
 /**
- * Utility class that parses the CSVs.
+ * Class that parses the CSVs.
  */
-public class CSVParser {
+public class CSVParser implements Parser<String> {
 
     /**
      * CSV constants. These are the index of the records from the COVID-19 stats CSV file we downloaded from the
@@ -39,7 +36,7 @@ public class CSVParser {
      * @return The map with the trees mapped to their respective countries
      */
     @SuppressWarnings("ConstantConditions")
-    public static Map<String, List<AVLVirusTree<Integer, ? extends VirusStatsNode<Integer>>>> parseCsvIntoVirusTrees(String csv) {
+    public Map<String, List<AVLVirusStatsTree<?, ?>>> parse(String csv) {
         // define the csv limiter
         String cvsSplitBy = ",";
 
@@ -47,7 +44,7 @@ public class CSVParser {
         String line;
 
         // list of trees mapped by each individual country
-        Map<String, List<AVLVirusTree<Integer, ? extends VirusStatsNode<Integer>>>> treesByCountry = new LinkedHashMap<>();
+        Map<String, List<AVLVirusStatsTree<?, ?>>> treesByCountry = new LinkedHashMap<>();
 
         // create a new reader to read the csv
         try (BufferedReader br = new BufferedReader(new StringReader(csv))) {
@@ -58,10 +55,10 @@ public class CSVParser {
             String currentLocation = "";
 
             // initialize the trees
-            AVLVirusTree<Integer, NewCasesNode> newCasesTree = null;
-            AVLVirusTree<Integer, TotalCasesNode> totalCasesTree = null;
-            AVLVirusTree<Integer, NewDeathsNode> newDeathsTree = null;
-            AVLVirusTree<Integer, TotalDeathsNode> totalDeathsTree = null;
+            AVLVirusStatsTree<Integer, NewCasesNode> newCasesTree = null;
+            AVLVirusStatsTree<Integer, TotalCasesNode> totalCasesTree = null;
+            AVLVirusStatsTree<Integer, NewDeathsNode> newDeathsTree = null;
+            AVLVirusStatsTree<Integer, TotalDeathsNode> totalDeathsTree = null;
 
             // start reading the csv
             while ((line = br.readLine()) != null) {
@@ -74,14 +71,7 @@ public class CSVParser {
                 // split the record, delimited by a comma, into a string array
                 String[] record = line.split(cvsSplitBy);
 
-                // the date of the record insertion in the CSV
-                LocalDate recordDate = dateToLocalDate(parseStringToDate("yyyy-MM-dd", record[DATE_IDX]));
-
-                // avoid recursive overflow in the insertion of the nodes in the trees.
-                // only start counting from march and upwards
-                if (recordDate.getMonth().compareTo(Month.MARCH) < 0) {
-                    continue;
-                }
+                String locationLowerCase = record[LOCATION_IDX].toLowerCase();
 
                 // create the nodes
                 NewCasesNode newCasesNode = createNewNode(NewCasesNode.class,
@@ -96,18 +86,18 @@ public class CSVParser {
                 // if the location record read in the csv is different than the current location,
                 // then that means we are reading the records of the next country in the csv. save the trees of the
                 // other country in the map, reassign the variables and start adding again from scratch.
-                if (!record[LOCATION_IDX].equals(currentLocation)) {
+                if (!locationLowerCase.equals(currentLocation)) {
                     if (!currentLocation.isEmpty()) {
                         treesByCountry.put(currentLocation,
                                 Arrays.asList(newCasesTree, totalCasesTree, newDeathsTree, totalDeathsTree));
                     }
 
-                    currentLocation = record[LOCATION_IDX];
+                    currentLocation = locationLowerCase;
 
-                    newCasesTree = new AVLVirusTree<>(newCasesNode);
-                    totalCasesTree = new AVLVirusTree<>(totalCasesNode);
-                    newDeathsTree = new AVLVirusTree<>(newDeathsNode);
-                    totalDeathsTree = new AVLVirusTree<>(totalDeathsNode);
+                    newCasesTree = new AVLVirusStatsTree<>(newCasesNode);
+                    totalCasesTree = new AVLVirusStatsTree<>(totalCasesNode);
+                    newDeathsTree = new AVLVirusStatsTree<>(newDeathsNode);
+                    totalDeathsTree = new AVLVirusStatsTree<>(totalDeathsNode);
 
                     continue;
                 }
@@ -118,7 +108,7 @@ public class CSVParser {
                 newDeathsTree.add(newDeathsNode);
                 totalDeathsTree.add(totalDeathsNode);
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -135,8 +125,8 @@ public class CSVParser {
      * @param <T>       A node that extends from {@link VirusStatsNode}
      * @return A new node
      */
-    private static <T extends VirusStatsNode<?>> T createNewNode(Class<T> nodeClazz, String date,
-                                                                 String location, String stat) {
+    private <T extends VirusStatsNode<?>> T createNewNode(Class<T> nodeClazz, String date,
+                                                          String location, String stat) {
         try {
             // get the constructor of the node reflectively, using the Class types from the passed arguments
             Constructor<T> nodeConstructor = nodeClazz.getConstructor(Date.class, String.class, int.class);

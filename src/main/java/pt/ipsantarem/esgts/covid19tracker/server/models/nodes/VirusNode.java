@@ -11,7 +11,17 @@ public abstract class VirusNode<K extends Comparable<K>, V> {
     /**
      * The height of this node relative to its parent node.
      */
-    private int height;
+    protected int height;
+
+    /**
+     * The left node
+     */
+    protected VirusNode<K, V> left;
+
+    /**
+     * The right node
+     */
+    protected VirusNode<K, V> right;
 
     public int getHeight() {
         return height;
@@ -19,6 +29,22 @@ public abstract class VirusNode<K extends Comparable<K>, V> {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public VirusNode<K, V> getLeft() {
+        return left;
+    }
+
+    public void setLeft(VirusNode<K, V> left) {
+        this.left = left;
+    }
+
+    public VirusNode<K, V> getRight() {
+        return right;
+    }
+
+    public void setRight(VirusNode<K, V> right) {
+        this.right = right;
     }
 
     /**

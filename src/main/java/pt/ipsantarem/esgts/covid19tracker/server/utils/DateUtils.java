@@ -21,7 +21,7 @@ public class DateUtils {
      * @throws ParseException If the parse was unsuccessful.
      */
     public static LocalDate parseStringToLocalDate(String date) throws ParseException {
-        return DateUtils.dateToLocalDate(new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(date));
+        return dateToLocalDate(new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH).parse(date));
     }
 
     /**
@@ -56,5 +56,16 @@ public class DateUtils {
      */
     public static Date localDateToDate(LocalDate localDate) {
         return java.sql.Date.valueOf(localDate);
+    }
+
+    /**
+     * Converts a {@link java.util.Date} to a {@link String}
+     *
+     * @param date The Date param
+     * @return The Date converted to a String
+     */
+    public static String localDateToString(Date date) {
+        LocalDate localDate = dateToLocalDate(date);
+        return localDate.getDayOfMonth() + "/" + localDate.getMonthValue() + "/" + localDate.getYear();
     }
 }

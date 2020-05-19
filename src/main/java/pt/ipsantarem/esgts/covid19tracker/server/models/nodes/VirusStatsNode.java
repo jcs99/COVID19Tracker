@@ -21,15 +21,6 @@ public abstract class VirusStatsNode<T> extends VirusNode<Date, T> {
      */
     private String country;
 
-    /**
-     * The left node
-     */
-    private VirusStatsNode<T> left;
-
-    /**
-     * The right node
-     */
-    private VirusStatsNode<T> right;
 
     public VirusStatsNode(Date date, String country) {
         this.date = date;
@@ -63,22 +54,6 @@ public abstract class VirusStatsNode<T> extends VirusNode<Date, T> {
 
     public void setCountry(String country) {
         this.country = country;
-    }
-
-    public VirusStatsNode<T> getLeft() {
-        return left;
-    }
-
-    public void setLeft(VirusStatsNode<T> left) {
-        this.left = left;
-    }
-
-    public VirusStatsNode<T> getRight() {
-        return right;
-    }
-
-    public void setRight(VirusStatsNode<T> right) {
-        this.right = right;
     }
 
     @Override
