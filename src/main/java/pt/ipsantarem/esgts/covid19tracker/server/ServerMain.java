@@ -39,6 +39,8 @@ public class ServerMain implements UpdateAvailableListener {
     private Map<String, String> storedCsv = db
             .hashMap("csv", Serializer.STRING, Serializer.STRING)
             .createOrOpen();
+
+    // the tree manager.
     private AVLVirusStatsTreesManager treeManager;
 
     // the parser to be used when parsing the csv.
