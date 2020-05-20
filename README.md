@@ -1,4 +1,4 @@
-## COVID-19 Tracker
+# COVID-19 Tracker
 
 A simple COVID-19 tracker that makes use of self-balancing trees to store the various COVID-19 statistics and exposes them through a REST API. This project is part of the Linguagens de Programação course unit evaluation.
 
