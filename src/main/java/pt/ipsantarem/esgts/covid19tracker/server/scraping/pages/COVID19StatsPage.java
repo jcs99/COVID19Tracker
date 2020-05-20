@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import static pt.ipsantarem.esgts.covid19tracker.server.utils.InputStreamUtils.readAllBytes;
+
 /**
  * Represents a webpage that has downloadable analyzable coronavirus statistics.
  */
@@ -52,12 +54,12 @@ public interface COVID19StatsPage {
 
         // get the input stream of the url connection
         try (InputStream data = new BufferedInputStream(conn.getInputStream())) {
-            return data.readAllBytes();
+            return readAllBytes(data);
         }
     }
 
     /**
-     * @return The downloaded and parsed covid 19 stats.
+     * @return The downloaded and parsed COVID 19 stats.
      * @throws IOException If there was a IO problem downloading and parsing the stats
      */
     default Map<String, List<AVLVirusStatsTree<?, ?>>> downloadAndParseCovid19Stats() throws IOException {
