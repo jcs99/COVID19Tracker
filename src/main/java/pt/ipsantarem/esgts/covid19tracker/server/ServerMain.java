@@ -1,18 +1,19 @@
 package pt.ipsantarem.esgts.covid19tracker.server;
 
 import io.javalin.Javalin;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ipsantarem.esgts.covid19tracker.server.callbacks.UpdateAvailableListener;
 import pt.ipsantarem.esgts.covid19tracker.server.exceptions.NonExistentCountryException;
 import pt.ipsantarem.esgts.covid19tracker.server.models.VirusStatistic;
-import pt.ipsantarem.esgts.covid19tracker.server.scraping.WorldInDataDocumentUpdateHandler;
+import pt.ipsantarem.esgts.covid19tracker.server.scraping.COVID19StatsPageDocumentUpdateHandler;
+import pt.ipsantarem.esgts.covid19tracker.server.scraping.pages.COVID19StatsPage;
+import pt.ipsantarem.esgts.covid19tracker.server.scraping.pages.WorldInDataPage;
+import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusStatsTree;
 import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusStatsTreesManager;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -20,6 +21,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static pt.ipsantarem.esgts.covid19tracker.server.utils.ObjectPersistenceUtils.readRecordsMap;
+import static pt.ipsantarem.esgts.covid19tracker.server.utils.ObjectPersistenceUtils.writeRecordsMap;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.VirusPredictionUtils.newStatCasesPredict;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.VirusPredictionUtils.totalStatCasesPredict;
 
@@ -32,22 +35,11 @@ public class ServerMain implements UpdateAvailableListener {
     // a scheduled executor service, for scheduling update checks
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    // a reference to the db file with the csv string.
-    private DB db = DBMaker.fileDB("csv.db").fileMmapEnable().make();
-
-    // the serialized csv record.
-    private Map<String, String> storedCsv = db
-            .hashMap("csv", Serializer.STRING, Serializer.STRING)
-            .createOrOpen();
+    // the covid 19 stats page instance to use
+    private COVID19StatsPage page = new WorldInDataPage();
 
     // the tree manager.
     private AVLVirusStatsTreesManager treeManager;
-
-    // the parser to be used when parsing the csv.
-    private Parser<String> parser = new CSVParser();
-
-    // is there a constant update check already scheduled.
-    private boolean isConstantUpdateCheckScheduled = false;
 
     public void init() {
         Javalin app = Javalin.create(config -> {
@@ -91,11 +83,11 @@ public class ServerMain implements UpdateAvailableListener {
     }
 
     /**
-     * This function gets called when the {@link WorldInDataDocumentUpdateHandler} finds a new update.
+     * This function gets called when the {@link COVID19StatsPageDocumentUpdateHandler} finds a new update.
      */
     @Override
-    public void onUpdateAvailable(String data) {
-        updateCsv(data);
+    public void onUpdateAvailable(Map<String, List<AVLVirusStatsTree<?, ?>>> records) {
+        updateRecordsFile(records);
 
         // terminate the scheduled constant update check on the executor service, since its already been updated
         executorService.shutdownNow();
@@ -107,13 +99,13 @@ public class ServerMain implements UpdateAvailableListener {
      */
     public void scheduleConstantChecks() {
         LOGGER.info("Scheduling constant checks for updates!");
-        if (!isConstantUpdateCheckScheduled) {
-            isConstantUpdateCheckScheduled = true;
-            try {
-                executorService.schedule(new WorldInDataDocumentUpdateHandler(this), 5, TimeUnit.MINUTES).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            executorService.scheduleAtFixedRate(() -> {
+                COVID19StatsPageDocumentUpdateHandler updateHandler = new COVID19StatsPageDocumentUpdateHandler(page, this);
+                updateHandler.call();
+            }, 5, 5, TimeUnit.MINUTES).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -122,32 +114,23 @@ public class ServerMain implements UpdateAvailableListener {
      */
     private void preinit() throws ExecutionException, InterruptedException {
         // check if there are updates first
-        String csv = executorService.submit(new WorldInDataDocumentUpdateHandler()).get();
+        Map<String, List<AVLVirusStatsTree<?, ?>>> records =
+                executorService.submit(new COVID19StatsPageDocumentUpdateHandler(page)).get();
 
         // update flag
         boolean updates = false;
 
-        // if there are csv updates, we have two options to save the updated csv now:
-        if (!csv.isEmpty()) {
+        if (!records.isEmpty()) {
             updates = true;
-            // if there isn't a previous serialized csv record, create it.
-            if (storedCsv.get("csv") == null) {
-                storedCsv.put("csv", csv);
-                // if there is, replace it.
-            } else {
-                storedCsv.replace("csv", csv);
-            }
-            // if there aren't updates, get the stored serialized csv record.
+            writeRecordsMap(records);
         } else {
-            csv = storedCsv.get("csv");
+            LOGGER.info("Using the saved map!");
+            records = readRecordsMap();
         }
 
         // create the tree and set it to inorder the results before we get any records from it.
-        treeManager = new AVLVirusStatsTreesManager(parser.parse(csv));
+        treeManager = new AVLVirusStatsTreesManager(records);
         treeManager.setInordered(true);
-
-        // add a shutdown hook to the JVM that closes the database.
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> db.close()));
 
         // then, finally initialize the server.
         init();
@@ -155,15 +138,15 @@ public class ServerMain implements UpdateAvailableListener {
         // check the current time. if the time is between 10 AM and 13 AM and there are still no updates, schedule
         // constant checks, there will be one soon
         LocalTime currentTime = LocalTime.now();
-        if (!updates && (currentTime.getHour() >= 10 && currentTime.getHour() <= 13)) {
+        if (!updates && (currentTime.getHour() >= 10 && currentTime.getHour() < 13)) {
             scheduleConstantChecks();
         }
     }
 
-    // update the csv and the TreesManager if new updates are found.
-    private void updateCsv(String csv) {
-        storedCsv.replace("csv", csv);
-        treeManager = new AVLVirusStatsTreesManager(parser.parse(csv));
+    // update the records file and the TreesManager if new updates are found.
+    private void updateRecordsFile(Map<String, List<AVLVirusStatsTree<?, ?>>> records) {
+        writeRecordsMap(records);
+        treeManager = new AVLVirusStatsTreesManager(records);
         treeManager.setInordered(true);
     }
 
