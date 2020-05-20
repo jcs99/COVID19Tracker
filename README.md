@@ -45,3 +45,7 @@ List of endpoints:
 * Predicting the number of new cases for the next day.
 
 ![New cases prediction for next day](examples/NewCasesPrediction.png)
+
+Fluxogram of the Main class general operation when first ran:
+
+![Fluxogram of the program](examples/ProgramDiagram.jpg)
