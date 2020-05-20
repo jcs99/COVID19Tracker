@@ -43,7 +43,7 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
             current = (T) (current.getKey().compareTo(key) < 0 ? current.getRight() : current.getLeft());
         }
 
-        return current != null ? new VirusStatistic<>(localDateToString(current.getDate()), current.getCountry(),
+        return current != null ? new VirusStatistic<E>(localDateToString(current.getDate()), current.getCountry(),
                 current.getNodeInformation()) {
             @Override
             public String statType() {
@@ -190,7 +190,7 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
 
         List<VirusStatistic<E>> preorder = new ArrayList<>();
 
-        preorder.add(new VirusStatistic<>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
+        preorder.add(new VirusStatistic<E>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();
@@ -206,7 +206,7 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
         if (node == null) return Collections.emptyList();
 
         List<VirusStatistic<E>> inorder = new ArrayList<>(inorder((T) node.getLeft()));
-        inorder.add(new VirusStatistic<>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
+        inorder.add(new VirusStatistic<E>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();
@@ -224,7 +224,7 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
 
         postorder.addAll(postorder((T) node.getLeft()));
         postorder.addAll(postorder((T) node.getRight()));
-        postorder.add(new VirusStatistic<>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
+        postorder.add(new VirusStatistic<E>(localDateToString(node.getDate()), node.getCountry(), node.getNodeInformation()) {
             @Override
             public String statType() {
                 return root.typeOfVirusStat();

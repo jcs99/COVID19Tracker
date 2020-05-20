@@ -15,12 +15,12 @@ import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusStatsTreesManager
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.requireNonNull;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.ObjectPersistenceUtils.readRecordsMap;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.ObjectPersistenceUtils.writeRecordsMap;
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.VirusPredictionUtils.newStatCasesPredict;
@@ -61,19 +61,19 @@ public class ServerMain implements UpdateAvailableListener {
 
         app.get("/:country/cases/new/:date", ctx -> {
             VirusStatistic<Integer> stat = treeManager.getNewCasesInDate(Long.parseLong(ctx.pathParam("date")));
-            ctx.json(Objects.requireNonNullElse(stat, ""));
+            ctx.json(requireNonNullElse(stat, ""));
         });
         app.get("/:country/cases/total/:date", ctx -> {
             VirusStatistic<Integer> stat = treeManager.getTotalCasesInDate(Long.parseLong(ctx.pathParam("date")));
-            ctx.json(Objects.requireNonNullElse(stat, ""));
+            ctx.json(requireNonNullElse(stat, ""));
         });
         app.get("/:country/deaths/new/:date", ctx -> {
             VirusStatistic<Integer> stat = treeManager.getNewDeathsInDate(Long.parseLong(ctx.pathParam("date")));
-            ctx.json(Objects.requireNonNullElse(stat, ""));
+            ctx.json(requireNonNullElse(stat, ""));
         });
         app.get("/:country/deaths/total/:date", ctx -> {
             VirusStatistic<Integer> stat = treeManager.getTotalDeathsInDate(Long.parseLong(ctx.pathParam("date")));
-            ctx.json(Objects.requireNonNullElse(stat, ""));
+            ctx.json(requireNonNullElse(stat, ""));
         });
 
         app.exception(NonExistentCountryException.class, (ex, ctx) ->
@@ -148,6 +148,10 @@ public class ServerMain implements UpdateAvailableListener {
         writeRecordsMap(records);
         treeManager = new AVLVirusStatsTreesManager(records);
         treeManager.setInordered(true);
+    }
+
+    private static <T> T requireNonNullElse(T obj, T defaultObj) {
+        return (obj != null) ? obj : requireNonNull(defaultObj, "defaultObj");
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

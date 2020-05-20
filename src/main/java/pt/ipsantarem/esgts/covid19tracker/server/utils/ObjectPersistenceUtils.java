@@ -93,6 +93,9 @@ public class ObjectPersistenceUtils {
      * @return The absolute path
      */
     private static String getCurrentAbsolutePath() {
-        return ObjectPersistenceUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String absolutePath = ObjectPersistenceUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+        absolutePath = absolutePath.replaceAll("%20", " ");
+        return absolutePath;
     }
 }
