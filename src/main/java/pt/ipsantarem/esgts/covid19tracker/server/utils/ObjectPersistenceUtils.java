@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An utility class that has various methods related to object persistence.
+ * An utility class that has various methods related to specific object persistence purposes in the server.
  */
 public class ObjectPersistenceUtils {
     private static final String LAST_DOWNLOAD_DATE_FILE = "lastDownloadDate.dat";

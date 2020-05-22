@@ -41,6 +41,12 @@ public interface COVID19StatsPage {
     LocalDate getLastTimeUpdated();
 
     /**
+     * @return An array with the time interval where the page gets updated (for example, it should return an array
+     * with 10 and 13 if the page gets updated between 10 and 13 AM).
+     */
+    int[] getUsualUpdateTimeframe();
+
+    /**
      * @return The parser to be used when parsing the downloaded COVID 19 stats.
      */
     Parser getParser();

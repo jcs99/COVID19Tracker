@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static pt.ipsantarem.esgts.covid19tracker.server.utils.DateUtils.localDateToString;
 
@@ -22,15 +23,26 @@ import static pt.ipsantarem.esgts.covid19tracker.server.utils.DateUtils.localDat
 public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusTree<Date, E, T> {
     private T root;
 
+    /**
+     * Constructs a new virus stat tree with a root element.
+     *
+     * @param root The element that will be used to initialize this tree.
+     */
     public AVLVirusStatsTree(T root) {
         this.root = root;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public T getRoot() {
         return root;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public VirusStatistic<E> get(Date key) {
         T current = root;
@@ -52,6 +64,9 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
         } : null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void add(T node) {
         checkNodeInstanceIsSameAsRoot(node.getClass());
@@ -59,29 +74,78 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
         root = insert(root, node);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(Date key) {
-        root = delete(root, key);
+        throw new UnsupportedOperationException("Delete operation not supported on AVL virus stats tree!");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<VirusStatistic<E>> preorder() {
         if (root == null) return Collections.emptyList();
         return preorder(root);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<VirusStatistic<E>> inorder() {
         if (root == null) return Collections.emptyList();
         return inorder(root);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<VirusStatistic<E>> postorder() {
         if (root == null) return Collections.emptyList();
         return postorder(root);
     }
 
+    /**
+     * Gets all the virus statistics in a certain date interval.
+     *
+     * @param firstDate  The first date interval.
+     * @param secondDate The second date interval.
+     * @return A list of virus statistics
+     */
+    public List<VirusStatistic<E>> getBetweenDates(Date firstDate, Date secondDate) {
+        long timeDiff = secondDate.getTime() - firstDate.getTime();
+        long diff = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
+        Date[] dates = new Date[(int) diff + 1];
+
+        for (int i = 0; i <= diff; i++) {
+            dates[i] = new Date(firstDate.getTime() + TimeUnit.DAYS.toMillis(i));
+        }
+
+        List<VirusStatistic<E>> recordsByDate = new ArrayList<>();
+
+        for (Date date : dates) {
+            VirusStatistic<E> stat = get(date);
+            if (stat != null) recordsByDate.add(stat);
+        }
+
+        return recordsByDate;
+    }
+
+    /**
+     * Insert a new node to the current ({@param current}) node. The algorithm specifies that if the key of the current
+     * node being analyzed is bigger than the node to be inserted, then it takes the left route, and if it's smaller, then
+     * it takes the right route. This process wil repeat until it eventually reaches the end of the tree. At the end of it,
+     * since this is a self-balancing tree, it rebalances the node in the tree.
+     *
+     * @param current The node to add the {@param node} to.
+     * @param node    The new node.
+     * @return The inserted node.
+     * @throws IllegalArgumentException If the key is duplicate.
+     */
     private T insert(T current, T node) {
         if (current == null) {
             return node;
@@ -96,93 +160,122 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
         return rebalance(current);
     }
 
-    private T delete(T current, Date key) {
-        if (key == null) {
-            return null;
-        } else if (current.getKey().compareTo(key) > 0) {
-            current.setLeft(delete((T) current.getLeft(), key));
-        } else if (current.getKey().compareTo(key) < 0) {
-            current.setRight(delete((T) current.getRight(), key));
-        } else {
-            if (current.getLeft() == null || current.getRight() == null) {
-                current = (T) ((current.getLeft() == null) ? current.getRight() : current.getLeft());
-            } else {
-                T mostLeftChild = mostLeftChild((T) current.getRight());
-                current.setKey(mostLeftChild.getKey());
-                current.setRight(delete((T) current.getRight(), current.getKey()));
-            }
-        }
+    /**
+     * Rebalances the node so that the tree stays balanced (one branch cant be substantially deeper than the other
+     * branch).
+     *
+     * @param node The node to be rebalanced.
+     * @return The rebalanced node.
+     */
+    private T rebalance(T node) {
+        // update the height of the node
+        updateHeight(node);
 
-        if (current != null) {
-            current = rebalance(current);
-        }
+        // get the balance of the node
+        int balance = getBalance(node);
 
-        return current;
-    }
-
-    private T mostLeftChild(T node) {
-        T current = node;
-
-        while (current.getRight() != null) {
-            current = (T) current.getLeft();
-        }
-
-        return current;
-    }
-
-    private T rebalance(T z) {
-        updateHeight(z);
-        int balance = getBalance(z);
-
+        // if the balance is bigger than 1
         if (balance > 1) {
-            if (height((T) z.getRight().getRight()) > height((T) z.getRight().getLeft())) {
-                z = rotateLeft(z);
+            // if the right node of the right node relative to the node being passed is bigger than the left node of the
+            // right node relative to the node being passed, then rotate the said node to the left.
+            if (height((T) node.getRight().getRight()) > height((T) node.getRight().getLeft())) {
+                node = rotateLeft(node);
+                // if the opposite condition holds true instead, set the right node of the passed node to its rotated to
+                // right variation, and then rotate the passed node to the left.
             } else {
-                z.setRight(rotateRight((T) z.getRight()));
-                z = rotateLeft(z);
+                node.setRight(rotateRight((T) node.getRight()));
+                node = rotateLeft(node);
             }
+            // if its less than -1 instead, do the opposite of what we are doing in case of the balance being bigger than 1.
         } else if (balance < -1) {
-            if (height((T) z.getLeft().getLeft()) > height((T) z.getLeft().getRight())) {
-                z = rotateRight(z);
+            if (height((T) node.getLeft().getLeft()) > height((T) node.getLeft().getRight())) {
+                node = rotateRight(node);
             } else {
-                z.setLeft(rotateLeft((T) z.getLeft()));
-                z = rotateRight(z);
+                node.setLeft(rotateLeft((T) node.getLeft()));
+                node = rotateRight(node);
             }
         }
 
-        return z;
+        return node;
     }
 
-    private T rotateRight(T y) {
-        T x = (T) y.getLeft();
-        T z = (T) y.getRight();
-        x.setRight(y);
-        y.setLeft(z);
-        updateHeight(y);
-        updateHeight(x);
-        return x;
+    /**
+     * Rotates the node to the right.
+     *
+     * @param node The node to be rotated to the right.
+     * @return The rotated node.
+     */
+    private T rotateRight(T node) {
+        // get the left and right nodes of the passed node
+        T left = (T) node.getLeft();
+        T right = (T) node.getRight();
+
+        // set the left node right node to the passed node
+        left.setRight(node);
+
+        // set the passed node left node to the previous right node.
+        node.setLeft(right);
+
+        // update the heights.
+        updateHeight(node);
+        updateHeight(left);
+
+        // return the node
+        return left;
     }
 
-    private T rotateLeft(T y) {
-        T x = (T) y.getRight();
-        T z = (T) x.getLeft();
-        x.setLeft(y);
-        y.setRight(z);
-        updateHeight(y);
-        updateHeight(x);
-        return x;
+    /**
+     * Rotates the node to the left.
+     *
+     * @param node The node to be rotated to the left side.
+     * @return The rotated node.
+     */
+    private T rotateLeft(T node) {
+        // get the left and right nodes of the passed node.
+        T right = (T) node.getRight();
+        T left = (T) right.getLeft();
+
+        // set the right node left node to the passed node.
+        right.setLeft(node);
+
+        // set the passed node right node to the previous left node.
+        node.setRight(left);
+
+        // update the heights.
+        updateHeight(node);
+        updateHeight(right);
+
+        // return the node.
+        return right;
     }
 
-    private void updateHeight(T n) {
-        n.setHeight(1 + Math.max(height((T) n.getLeft()), height((T) n.getRight())));
+    /**
+     * Sets the height of the {@param node} to the highest height in the subset of the left and right nodes.
+     *
+     * @param node The node to update the height of.
+     */
+    private void updateHeight(T node) {
+        node.setHeight(1 + Math.max(height((T) node.getLeft()), height((T) node.getRight())));
     }
 
-    private int height(T n) {
-        return n == null ? -1 : n.getHeight();
+    /**
+     * Gets the height of a {@param node}.
+     *
+     * @param node The node to get the height for.
+     * @return the height of the node.
+     */
+    private int height(T node) {
+        return node == null ? -1 : node.getHeight();
     }
 
-    private int getBalance(T n) {
-        return (n == null) ? 0 : height((T) n.getRight()) - height((T) n.getLeft());
+    /**
+     * Gets the balance of a {@param node} by subtracting the height of its left and right nodes.
+     *
+     * @param node The node to get balance for
+     * @return The balance of the node
+     */
+    private int getBalance(T node) {
+        return (node == null) ? 0 : height((T) node.getRight()) - height((T) node.getLeft());
     }
 
     private List<VirusStatistic<E>> preorder(T node) {
@@ -234,6 +327,8 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
         return postorder;
     }
 
+    // ------------------------------------------ PRECONDITIONS ------------------------------------------ //
+
     private void checkNodeInstanceIsSameAsRoot(Class<?> nodeClazz) {
         if (!root.getClass().isAssignableFrom(nodeClazz)) {
             throw new IllegalArgumentException("The node being inserted is from the " + nodeClazz.getSimpleName()
@@ -249,4 +344,6 @@ public class AVLVirusStatsTree<E, T extends VirusStatsNode<E>> implements VirusT
                     + " in this tree must share the same country.");
         }
     }
+
+    // ------------------------------------------ PRECONDITIONS ------------------------------------------ //
 }

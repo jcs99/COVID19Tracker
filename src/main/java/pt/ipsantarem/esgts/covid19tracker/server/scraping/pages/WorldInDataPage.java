@@ -21,6 +21,9 @@ public class WorldInDataPage implements COVID19StatsPage {
     // the document instance
     private static Document document;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Document getPageInstance() {
         if (document == null) {
@@ -30,6 +33,9 @@ public class WorldInDataPage implements COVID19StatsPage {
         return document;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public URL getPageURL() {
         URL url = null;
@@ -41,6 +47,9 @@ public class WorldInDataPage implements COVID19StatsPage {
         return url;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public URL getDownloadURL() {
         URL url = null;
@@ -52,6 +61,9 @@ public class WorldInDataPage implements COVID19StatsPage {
         return url;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LocalDate getLastTimeUpdated() {
         String pageDate = getPageInstance().getElementsByClass("last-updated")
@@ -68,6 +80,17 @@ public class WorldInDataPage implements COVID19StatsPage {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int[] getUsualUpdateTimeframe() {
+        return new int[]{10, 13};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Parser getParser() {
         return new WorldInDataCSVParser();

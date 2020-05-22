@@ -2,7 +2,7 @@ package pt.ipsantarem.esgts.covid19tracker.server.scraping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ipsantarem.esgts.covid19tracker.server.callbacks.UpdateAvailableListener;
+import pt.ipsantarem.esgts.covid19tracker.server.listeners.UpdateAvailableListener;
 import pt.ipsantarem.esgts.covid19tracker.server.scraping.pages.COVID19StatsPage;
 import pt.ipsantarem.esgts.covid19tracker.server.trees.AVLVirusStatsTree;
 
@@ -79,6 +79,7 @@ public class COVID19StatsPageDocumentUpdateHandler implements Callable<Map<Strin
             return downloadRecords();
         }
 
+        // get the time where the page was last updated.
         LocalDate lastTimeUpdatedInPage = covid19StatsPage.getLastTimeUpdated();
 
         // if the time where the records were updated on the page is bigger than the time where we last downloaded

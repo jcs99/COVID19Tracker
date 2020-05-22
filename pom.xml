@@ -14,29 +14,11 @@
         </developer>
     </developers>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jsweet-plugins-release</id>
-            <name>plugins-release</name>
-            <url>http://repository.jsweet.org/artifactory/plugins-release-local</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>jsweet-central</id>
-            <name>libs-release</name>
-            <url>http://repository.jsweet.org/artifactory/libs-release-local</url>
-        </repository>
-    </repositories>
-
     <properties>
         <java.version>1.8</java.version>
         <javalin.version>3.8.0</javalin.version>
-        <jsweet-core.version>6.1.0</jsweet-core.version>
-        <jsweet-transpiler.version>3.0.0-RC2</jsweet-transpiler.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-clean-plugin.version>3.0.0</maven-clean-plugin.version>
-        <jsweet-maven-plugin.version>3.0.0-RC1</jsweet-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -62,30 +44,30 @@
             <version>2.9.9</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
             <version>${javalin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>4.8.34</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>org.jsweet</groupId>
-            <artifactId>jsweet-core</artifactId>
-            <version>${jsweet-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsweet</groupId>
-            <artifactId>jsweet-transpiler</artifactId>
-            <version>${jsweet-transpiler.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsweet</groupId>
-            <artifactId>j4ts</artifactId>
-            <version>0.6.0</version>
-        </dependency> -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -101,42 +83,14 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.8.0-beta4</version>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>1.10.2-1</version>
-        </dependency> -->
+            <artifactId>swagger-ui</artifactId>
+            <version>3.24.3</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <!-- <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.jsweet</groupId>
-                                        <artifactId>jsweet-maven-plugin</artifactId>
-                                        <goals>
-                                            <goal>jsweet</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore>
-                                        </ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement> -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -152,19 +106,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>${maven-clean-plugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>src/main/resources/static/dist</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>.jsweet</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>.ts</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -201,29 +142,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- <plugin>
-                <groupId>org.jsweet</groupId>
-                <artifactId>jsweet-maven-plugin</artifactId>
-                <version>${jsweet-maven-plugin.version}</version>
-                <configuration>
-                    <includes>
-                        <include>pt/ipsantarem/esgts/covid19tracker/client/**/*.java</include>
-                    </includes>
-                    <sourceMap>true</sourceMap>
-                    <tsOut>src/main/resources/static/dist/ts</tsOut>
-                    <outDir>src/main/resources/static/dist/js</outDir>
-                    <targetVersion>ES6</targetVersion>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-js</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>jsweet</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin> -->
         </plugins>
     </build>
 </project>

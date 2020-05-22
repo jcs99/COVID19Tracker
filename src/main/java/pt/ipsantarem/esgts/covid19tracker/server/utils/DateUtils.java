@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Utility class for various Date class related tasks.
+ * Utility class for various date related tasks.
  */
 public class DateUtils {
 

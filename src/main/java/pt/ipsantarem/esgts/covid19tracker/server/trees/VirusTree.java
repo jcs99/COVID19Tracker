@@ -17,32 +17,60 @@ public interface VirusTree<K extends Comparable<K>, E, T extends VirusNode<K, E>
     T getRoot();
 
     /**
-     * @return The obtained element by its key
+     * @return The obtained element by its key.
      */
     VirusStatistic<E> get(K key);
 
     /**
-     * Adds an element to the tree.
+     * Adds a node to the tree.
      */
     void add(T node);
 
     /**
-     * Deletes an element from the tree.
+     * Deletes an element from the tree. This method is not supported in the {@link AVLVirusStatsTree} class since
+     * the stats are final unless the external source changes (and in that case, it's not our responsibility).
      */
     void delete(K key);
 
     /**
-     * @return A collection of preordered virus stats.
+     * Preorder traversal of the tree.
+     * If the tree has the following structure:
+     * 1
+     * /\
+     * 2 3
+     * /\
+     * 4 5
+     * Then the returned preordered elements will be: 1-2-4-5-3
+     *
+     * @return A list of the virus stats after the preorder operation.
      */
     Collection<VirusStatistic<E>> preorder();
 
     /**
-     * @return A collection of inordered virus stats.
+     * Inorder traversal of the tree.
+     * If the tree has the following structure:
+     * 1
+     * /\
+     * 2 3
+     * /\
+     * 4 5
+     * Then the returned inordered elements will be: 4-2-5-1-3
+     * The inorder algorithm will be of particular importance in the {@link AVLVirusStatsTree}
+     * class since it will allow us to get a list of virus stats ordered since the date of the first cases.
+     * @return A list of the virus stats after the inorder operation.
      */
     Collection<VirusStatistic<E>> inorder();
 
     /**
-     * @return A collection of postordered virus stats.
+     * Postorder traversal of the tree.
+     * If the tree has the following structure:
+     * 1
+     * /\
+     * 2 3
+     * /\
+     * 4 5
+     * Then the returned postordered elements will be: 4-5-2-3-1
+     * @return A list of the virus stats after the postorder operation.
      */
     Collection<VirusStatistic<E>> postorder();
 }
