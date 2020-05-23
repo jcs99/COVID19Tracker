@@ -4,7 +4,7 @@ A simple COVID-19 tracker that makes use of self-balancing trees to store the va
 
 Developers: Me.
 
-The API documentation is available in the `/api/swagger` address.
+The API documentation is available in the http://covid-19-stats-ips.herokuapp.com/api/swagger address.
 
 **EXAMPLES**
 

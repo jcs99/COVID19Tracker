@@ -51,7 +51,7 @@ public class ServerMain implements UpdateAvailableListener {
             config.defaultContentType = "application/json";
             config.contextPath = "/api";
             config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
-        }).start(7000);
+        }).start(getHerokuAssignedPort());
 
         // --------------------------------------- API ENDPOINTS --------------------------------------- //
 
@@ -186,6 +186,16 @@ public class ServerMain implements UpdateAvailableListener {
                 .activateAnnotationScanningFor("pt.ipsantarem.esgts.covid19tracker.server")
                 .swagger(new SwaggerOptions("/swagger")
                         .title("COVID-19 stats API documentation"));
+    }
+
+    // gets the heroku assigned port, defaults to 7000 if none
+    private static int getHerokuAssignedPort() {
+        String herokuPort = System.getenv("PORT");
+        if (herokuPort != null) {
+            return Integer.parseInt(herokuPort);
+        }
+
+        return 7000;
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
